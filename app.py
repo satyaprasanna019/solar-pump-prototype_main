@@ -1,5 +1,4 @@
 import streamlit as st
-import numpy as np
 import time
 
 # =========================
@@ -9,26 +8,41 @@ st.markdown(
     """
     <style>
     .card {
-        background-color: #eff6ff;
+        background-color: #ffffff;
         border-radius: 12px;
         padding: 20px;
-        text-align: center;
         margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .metric-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
     }
     .metric-value {
+        font-size: 22px;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+    .big-metric {
         font-size: 48px;
         font-weight: bold;
         color: #1e40af;
     }
-    .delta-green {
-        color: #047857;
-        background-color: #dcfce7;
-        padding: 4px 8px;
-        border-radius: 999px;
-        font-size: 14px;
+    .tag {
         display: inline-block;
-        margin-top: 10px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+    .tag-green {
+        background-color: #dcfce7;
+        color: #047857;
+    }
+    .tag-orange {
+        background-color: #ffedd5;
+        color: #c2410c;
     }
     </style>
     """,
@@ -46,9 +60,10 @@ page = st.sidebar.radio("Navigation", ["Dashboard", "Billing & Credits", "Solar 
 # =========================
 if page == "Dashboard":
     st.title("Mining Operations Dashboard")
-    st.caption("Real-time water management and AI-powered dewatering insights")
+    st.caption("Real-time water management and AI-powered insights")
     st.write("Last updated:", time.strftime("%B %d, %Y at %I:%M %p"))
 
+    # --- AI Water Inflow Prediction ---
     st.subheader("AI Water Inflow Prediction")
     col1, col2 = st.columns([2, 1])
 
@@ -56,9 +71,9 @@ if page == "Dashboard":
         st.markdown(
             f"""
             <div class="card">
-                <div class="metric-value">2,847</div>
+                <div class="big-metric">2,847</div>
                 <div>Gallons per minute (predicted)</div>
-                <div class="delta-green">↑ 12% increase vs. last hour</div>
+                <div class="tag tag-green">↑ 12% increase vs. last hour</div>
             </div>
             """,
             unsafe_allow_html=True
@@ -71,14 +86,87 @@ if page == "Dashboard":
         if st.button("Update Prediction"):
             st.success("Prediction updated with new parameters!")
 
-    st.subheader("Pump Operations")
-    st.progress(70)
+    # --- Pump Operations | Water Levels | System Status ---
+    colA, colB, colC = st.columns(3)
 
-    st.subheader("Water Levels")
-    st.metric("Reservoir Level", "65%", "↓ 5% vs. last day")
+    with colA:
+        st.markdown("### Pump Operations")
+        st.toggle("Pump A-1 (1245 GPM)", value=True)
+        st.toggle("Pump B-2 (987 GPM)", value=True)
+        st.toggle("Pump C-3 (Maintenance)", value=False)
 
-    st.subheader("System Status")
-    st.success("All systems operational ✅")
+    with colB:
+        st.markdown("### Water Levels")
+        st.progress(78, text="Main Sump (24.5 ft depth)")
+        st.progress(63, text="Secondary Sump (12.8 ft depth)")
+        st.progress(11, text="Emergency Overflow (3.2 ft depth)")
+
+    with colC:
+        st.markdown("### System Status")
+        st.markdown('<span class="metric-title">Overall Health</span>', unsafe_allow_html=True)
+        st.markdown('<span class="tag tag-green">Optimal</span>', unsafe_allow_html=True)
+        st.metric("Power Consumption", "847 kW")
+        st.metric("Efficiency Rating", "94.2%")
+        st.metric("Next Maintenance", "Oct 15, 2025")
+        st.progress(92, text="Daily Performance")
+
+    # --- Billing Summary ---
+    st.markdown("### Billing Summary")
+    st.caption("Current period water removal costs and projections")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="metric-value">$25,236</div>
+                <div>Current Period</div>
+                <div style="font-size:12px; color:gray;">Sep 1-21, 2025</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="metric-value" style="color:#b45309;">$37,200</div>
+                <div>Projected Monthly</div>
+                <div style="font-size:12px; color:green;">↓ 8% under budget</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="metric-value" style="color:#047857;">2.6M</div>
+                <div>Gallons Processed</div>
+                <div style="font-size:12px; color:gray;">This period</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="metric-value" style="color:#111827;">$0.0104</div>
+                <div>Cost per Gallon</div>
+                <div style="font-size:12px; color:green;">↓ 3% improvement</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    billing_col1, billing_col2 = st.columns([1, 1])
+    with billing_col1:
+        period = st.selectbox("Billing Period:", ["Current Period", "Previous Period", "Year to Date"])
+    with billing_col2:
+        st.button("🔄 Refresh Data")
+
+    # --- Quick Actions ---
+    st.markdown("### Quick Actions")
+    qa_col1, qa_col2, qa_col3 = st.columns(3)
+    qa_col1.button("🌱 Carbon Credits")
+    qa_col2.button("🔆 Solar Analytics")
+    qa_col3.button("📄 Generate Report")
 
 # =========================
 # Billing & Credits Page
