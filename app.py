@@ -1,58 +1,71 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
+import datetime
+import numpy as np
 
-# -------------------
-# Page config
-# -------------------
-st.set_page_config(page_title="Operations Command Center", layout="wide")
+def compute_prediction(weather_impact, geo_perm, season_factor):
+    # replicate the logic you want
+    base = 2500
+    return int(round(base * weather_impact * geo_perm * season_factor))
 
-st.title("🚀 Operations Command Center Dashboard")
+def main():
+    st.set_page_config(page_title="Mining Operations Dashboard", layout="wide")
 
-# -------------------
-# Sidebar Filters
-# -------------------
-st.sidebar.header("Filters")
-date_filter = st.sidebar.date_input("Select Date Range")
-category_filter = st.sidebar.selectbox("Category", ["All", "Solar", "Wind", "Hydro"])
+    # Header
+    st.markdown("## Mining Operations Dashboard")
+    st.markdown("Real-time water management and AI-powered dewatering insights")
+    now = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    st.markdown(f"*Last updated: {now}*")
 
-# -------------------
-# Dummy Data (replace with your actual dataset)
-# -------------------
-data = {
-    "Category": ["Solar", "Wind", "Hydro", "Solar", "Wind"],
-    "Value": [40, 30, 20, 50, 35],
-    "Region": ["North", "South", "East", "West", "Central"]
-}
-df = pd.DataFrame(data)
+    # Sidebar or top nav (could be done via st.beta_columns or custom HTML)
+    nav1, nav2, nav3 = st.columns(3)
+    with nav1:
+        if st.button("Dashboard"):
+            pass  # maybe highlight or route
+    with nav2:
+        if st.button("Billing & Credits"):
+            pass
+    with nav3:
+        if st.button("Solar & Optimization"):
+            pass
 
-# Apply filter
-if category_filter != "All":
-    df = df[df["Category"] == category_filter]
+    st.markdown("---")
 
-# -------------------
-# Layout with 2 columns
-# -------------------
-col1, col2 = st.columns(2)
+    # Prediction section
+    st.subheader("AI Water Inflow Prediction")
+    st.markdown("Machine learning analysis of mine water patterns.")
 
-with col1:
-    st.subheader("📊 Category Distribution")
-    if not df.empty:
-        fig1 = px.pie(df, names="Category", values="Value", title="Energy Breakdown")
-        st.plotly_chart(fig1, use_container_width=True)
+    # Inputs
+    weather_impact = st.slider("Weather Impact Factor", 0.5, 2.0, 1.2, 0.1)
+    geo_perm = st.slider("Geological Permeability", 0.5, 2.0, 0.9, 0.1)
+    season = st.selectbox("Seasonal Adjustment", options=["Wet Season (1.3x)", "Dry Season (0.8x)", "Normal (1.0x)"])
+    # map season to factor:
+    if "Wet" in season:
+        season_factor = 1.3
+    elif "Dry" in season:
+        season_factor = 0.8
     else:
-        st.warning("No data available for the selected filter.")
+        season_factor = 1.0
 
-with col2:
-    st.subheader("🌍 Regional Analysis")
-    if not df.empty:
-        fig2 = px.bar(df, x="Region", y="Value", color="Category", title="Region-Wise Performance")
-        st.plotly_chart(fig2, use_container_width=True)
+    if st.button("Update Prediction"):
+        prediction = compute_prediction(weather_impact, geo_perm, season_factor)
+        # Display
+        st.metric(label="Predicted Inflow (gallons per minute)", value=f"{prediction:,}", delta="12% vs last hour")
     else:
-        st.warning("No data available for the selected filter.")
+        # initial or default display
+        default_pred = compute_prediction(weather_impact, geo_perm, season_factor)
+        st.metric(label="Predicted Inflow (gallons per minute)", value=f"{default_pred:,}", delta="12% vs last hour")
 
-# -------------------
-# Detailed Data
-# -------------------
-st.subheader("📈 Detailed Data")
-st.dataframe(df, use_container_width=True)
+    # Other cards / panels
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("### Pump Operations")
+        # perhaps stats or placeholders
+    with col2:
+        st.markdown("### Water Levels")
+    with col3:
+        st.markdown("### System Status")
+
+    # Optional: a footer or so
+
+if __name__ == "__main__":
+    main()
