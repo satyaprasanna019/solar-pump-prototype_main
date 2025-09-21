@@ -1,44 +1,39 @@
 import streamlit as st
 import datetime
-import numpy as np
+import os
+
+# Load local CSS
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 def compute_prediction(weather_impact, geo_perm, season_factor):
-    # replicate the logic you want
     base = 2500
     return int(round(base * weather_impact * geo_perm * season_factor))
 
 def main():
     st.set_page_config(page_title="Mining Operations Dashboard", layout="wide")
 
-    # Header
-    st.markdown("## Mining Operations Dashboard")
-    st.markdown("Real-time water management and AI-powered dewatering insights")
-    now = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
-    st.markdown(f"*Last updated: {now}*")
+    # load CSS
+    local_css(os.path.join("assets", "styles.css"))
 
-    # Sidebar or top nav (could be done via st.beta_columns or custom HTML)
-    nav1, nav2, nav3 = st.columns(3)
-    with nav1:
-        if st.button("Dashboard"):
-            pass  # maybe highlight or route
-    with nav2:
-        if st.button("Billing & Credits"):
-            pass
-    with nav3:
-        if st.button("Solar & Optimization"):
-            pass
+    # header
+    st.title("Mining Operations Dashboard")
+    st.caption("Real-time water management and AI-powered dewatering insights")
+    now = datetime.datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    st.markdown(f"**Last updated:** {now}")
 
     st.markdown("---")
 
     # Prediction section
     st.subheader("AI Water Inflow Prediction")
-    st.markdown("Machine learning analysis of mine water patterns.")
+    st.write("Machine learning analysis of mine water patterns.")
 
     # Inputs
     weather_impact = st.slider("Weather Impact Factor", 0.5, 2.0, 1.2, 0.1)
     geo_perm = st.slider("Geological Permeability", 0.5, 2.0, 0.9, 0.1)
-    season = st.selectbox("Seasonal Adjustment", options=["Wet Season (1.3x)", "Dry Season (0.8x)", "Normal (1.0x)"])
-    # map season to factor:
+    season = st.selectbox("Seasonal Adjustment", ["Wet Season (1.3x)", "Dry Season (0.8x)", "Normal (1.0x)"])
+
     if "Wet" in season:
         season_factor = 1.3
     elif "Dry" in season:
@@ -46,26 +41,27 @@ def main():
     else:
         season_factor = 1.0
 
+    # Prediction button
     if st.button("Update Prediction"):
         prediction = compute_prediction(weather_impact, geo_perm, season_factor)
-        # Display
-        st.metric(label="Predicted Inflow (gallons per minute)", value=f"{prediction:,}", delta="12% vs last hour")
     else:
-        # initial or default display
-        default_pred = compute_prediction(weather_impact, geo_perm, season_factor)
-        st.metric(label="Predicted Inflow (gallons per minute)", value=f"{default_pred:,}", delta="12% vs last hour")
+        prediction = compute_prediction(weather_impact, geo_perm, season_factor)
 
-    # Other cards / panels
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("### Pump Operations")
-        # perhaps stats or placeholders
-    with col2:
-        st.markdown("### Water Levels")
-    with col3:
-        st.markdown("### System Status")
+    # Display card
+    st.markdown(f'''
+    <div class="card">
+      <div class="metric-value">{prediction:,}</div>
+      <div>Gallons per minute (predicted)</div>
+      <div class="delta-green">↑ 12% vs last hour</div>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Optional: a footer or so
+    # other cards
+    cols = st.columns(3)
+    titles = ["Pump Operations", "Water Levels", "System Status"]
+    for col, title in zip(cols, titles):
+        with col:
+            st.markdown(f'<div class="card"><h3>{title}</h3></div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
